@@ -137,7 +137,7 @@ MAILERS = {
 # Настройки MEDV-API
 MEDV_CERT = env.str("MEDV_CERT", multiline=True, default="")
 MEDV_KEY = env.str("MEDV_KEY", multiline=True, default="")
-print(MEDV_CERT)
+
 try:
     from .local_settings import *
 except ImportError:
