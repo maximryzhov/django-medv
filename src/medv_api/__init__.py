@@ -6,6 +6,7 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
+from uuid import uuid4
 
 from .validators import (
     CertificateStatus,
@@ -97,7 +98,8 @@ class MedvClient:
     def call_method(self, method_name: str, body=None) -> MedvResponse:
         payload = {
             "jsonrpc": "2.0",
-            "method": method_name
+            "id": str(uuid4()),
+            "method": method_name,
         }
         if body is not None:
             payload["params"] = body
