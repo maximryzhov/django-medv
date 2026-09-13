@@ -81,13 +81,3 @@ def check_certificate_dates(cert_contents: str) -> CertificateDatesCheckResult:
     return CertificateDatesCheckResult(
         status, cert.not_valid_before_utc, cert.not_valid_after_utc
     )
-
-
-def check_certificate_auth(cert_contents: str):
-    cert = x509.load_pem_x509_certificate(cert_contents.encode())
-        
-    eku = cert.extensions.get_extension_for_class(
-        x509.ExtendedKeyUsage
-    ).value
-
-    return x509.oid.ExtendedKeyUsageOID.CLIENT_AUTH in eku
