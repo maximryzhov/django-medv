@@ -6,5 +6,5 @@ from .views import MedvTestView
 app_name = "django_medv"
 
 urlpatterns = [
-    path("medv-test/", MedvTestView.as_view(), name="medv-test"),
+    path("", MedvTestView.as_view(), name="medv-test"),
 ]
