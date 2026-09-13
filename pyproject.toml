@@ -8,7 +8,6 @@ authors = [
 ]
 requires-python = ">=3.14"
 dependencies = [
-    "cryptography>=50.0.1",
     "django>=6.1.1",
     "django-environ>=0.14.0",
 ]
