@@ -1,4 +1,8 @@
-import niquests
+from contextlib import contextmanager
+from pathlib import Path
+from tempfile import TemporaryDirectory
+
+import urllib3
 
 from .utils import (
     CertificateStatus,
@@ -19,6 +23,13 @@ class MedvClientCertificateError(MedvClientError):
 
 class MedvClientConnectionError(MedvClientError):
     pass
+
+
+class MedvResponse:
+    def __init__(self, response: urllib3.response.HTTPResponse) -> None:
+        self.status_code = response.status
+        self.headers = response.headers
+        self.text = response.data.decode("utf-8", errors="replace")
 
 
 class MedvClient:
@@ -51,17 +62,37 @@ class MedvClient:
                 f"Срок действия сертификата истёк {dates_check_result.end_date}"
             )
 
+    @contextmanager
+    def _authenticated_pool(self):
+        with TemporaryDirectory() as temp_dir:
+            cert_path = Path(temp_dir) / "certificate.pem"
+            key_path = Path(temp_dir) / "private-key.pem"
+            cert_path.write_text(self.cert, encoding="utf-8")
+            key_path.write_text(self.key, encoding="utf-8")
+
+            pool = urllib3.PoolManager(
+                cert_file=str(cert_path),
+                key_file=str(key_path),
+            )
+            try:
+                yield pool
+            finally:
+                pool.clear()
+
     def ping_base_url(self) -> None:
         """
         Проверяет, что  сервис доступен
         даже если ответ 4xx или 5xx
         """
+        pool = urllib3.PoolManager()
         try:
-            response = niquests.get(self.BASE_URL)
-        except niquests.exceptions.RequestException:
-            raise MedvClientConnectionError("Нет соединения с сервером")
+            pool.request("GET", self.BASE_URL, preload_content=True)
+        except urllib3.exceptions.HTTPError as error:
+            raise MedvClientConnectionError("Нет соединения с сервером") from error
+        finally:
+            pool.clear()
 
-    def call_method(self, method_name: str, body=None) -> niquests.Response:
+    def call_method(self, method_name: str, body=None) -> MedvResponse:
         payload = {
             "jsonrpc": "2.0",
             "method": method_name
@@ -70,13 +101,14 @@ class MedvClient:
             payload["params"] = body
 
         try:
-            response = niquests.post(
-                self.BASE_URL,
-                json=payload,
-                cert=(self.cert, self.key)
-            )
-        except niquests.exceptions.RequestException:
-            raise MedvClientConnectionError("Нет соединения с сервером")
+            with self._authenticated_pool() as pool:
+                response = pool.request(
+                    "POST",
+                    self.BASE_URL,
+                    json=payload,
+                    preload_content=True,
+                )
+        except urllib3.exceptions.HTTPError as error:
+            raise MedvClientConnectionError("Нет соединения с сервером") from error
 
-        return response
-            
+        return MedvResponse(response)

@@ -11,7 +11,6 @@ dependencies = [
     "cryptography>=50.0.1",
     "django>=6.1.1",
     "django-environ>=0.14.0",
-    "niquests>=3.21.1",
 ]
 
 [project.scripts]
