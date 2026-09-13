@@ -11,24 +11,24 @@ https://docs.djangoproject.com/en/6.1/ref/settings/
 """
 
 import logging
-from pathlib import Path
 import os
+from pathlib import Path
 
 import django
-import environ
+
+from utils import load_env
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Чувствительные данные хранятся в файле .env
-environ.Env.read_env(os.path.join(BASE_DIR, ".env"))
-env = environ.Env()
+load_env(BASE_DIR / ".env")
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = env("DJANGO_SECRET_KEY")
+SECRET_KEY = os.environ["DJANGO_SECRET_KEY"]
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -137,8 +137,8 @@ MAILERS = {
 }
 
 # Настройки MEDV-API
-MEDV_CERT = env.str("MEDV_CERT", multiline=True, default="")
-MEDV_KEY = env.str("MEDV_KEY", multiline=True, default="")
+MEDV_CERT = os.environ.get("MEDV_CERT", "").replace("\\n", "\n")
+MEDV_KEY = os.environ.get("MEDV_KEY", "").replace("\\n", "\n")
 
 try:
     from .local_settings import *
