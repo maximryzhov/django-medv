@@ -58,20 +58,25 @@ class MedvClient:
         """
         try:
             response = niquests.get(self.BASE_URL)
-        except niquests.exceptions.ConnectionError:
+        except niquests.exceptions.RequestException:
             raise MedvClientConnectionError("Нет соединения с сервером")
 
-    def call_method(self, method_name: str) -> niquests.Response:
+    def call_method(self, method_name: str, body=None) -> niquests.Response:
         payload = {
             "jsonrpc": "2.0",
             "method": method_name
         }
+        if body is not None:
+            payload["params"] = body
 
-        response = niquests.post(
-            self.BASE_URL,
-            json=payload,
-            cert=(self.cert, self.key)
-        )
+        try:
+            response = niquests.post(
+                self.BASE_URL,
+                json=payload,
+                cert=(self.cert, self.key)
+            )
+        except niquests.exceptions.RequestException:
+            raise MedvClientConnectionError("Нет соединения с сервером")
 
         return response
             

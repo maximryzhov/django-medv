@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Проверка Medv API</title>
+    <style>
+        body {
+            margin: 1rem;
+            font-family: sans-serif;
+        }
+
+        main {
+            display: flex;
+            gap: 2rem;
+            align-items: flex-start;
+        }
+
+        aside {
+            min-width: 12rem;
+        }
+
+        section {
+            flex: 1;
+            max-width: 48rem;
+        }
+
+        label {
+            display: block;
+            margin: 0.75rem 0 0.25rem;
+        }
+
+        input,
+        textarea {
+            box-sizing: border-box;
+            width: 100%;
+            padding: 0.4rem;
+        }
+
+        textarea {
+            font-family: monospace;
+        }
+
+        button {
+            margin-top: 0.75rem;
+            padding: 0.4rem 0.8rem;
+        }
+
+        pre {
+            overflow: auto;
+            white-space: pre-wrap;
+        }
+
+        .status {
+            margin: 0.25rem 0;
+        }
+
+        .ok {
+            color: green;
+        }
+
+        .error {
+            color: red;
+        }
+
+        iframe {
+            display: block;
+            width: 100%;
+            min-height: 12rem;
+            border: 1px solid #ccc;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Проверка Medv API</h1>
+
+    <h2>Проверки соединения</h2>
+    {% for check in health_checks %}
+    <p class="status {% if check.ok %}ok{% else %}error{% endif %}">
+        {{ check.name }}: {{ check.message }}
+    </p>
+    {% endfor %}
+
+    {% if request_error %}
+    <p class="error">Ошибка запроса: {{ request_error }}</p>
+    {% endif %}
+
+    <form method="post">
+        {% csrf_token %}
+        {{ form.non_field_errors }}
+        <main>
+            <aside>
+                <h2>Доступные методы</h2>
+                <ul>
+                    {% for method in available_methods %}
+                    <li><a href="?method={{ method|urlencode }}">{{ method }}</a></li>
+                    {% endfor %}
+                </ul>
+                <label for="{{ form.method_name.id_for_label }}">{{ form.method_name.label }}</label>
+                {{ form.method_name }}
+                {{ form.method_name.errors }}
+            </aside>
+
+            <section>
+                <label for="{{ form.method_body.id_for_label }}">{{ form.method_body.label }}</label>
+                {{ form.method_body }}
+                {{ form.method_body.errors }}
+                <button type="submit">Отправить</button>
+
+                {% if has_response %}
+                <h2>Ответ</h2>
+                <p class="{% if response_error %}error{% else %}ok{% endif %}">
+                    Код ответа: {{ response_status_code }}
+                </p>
+                <p>Тип содержимого: {{ response_content_type }}</p>
+                <h3>Тело ответа</h3>
+
+                {% if response_kind == "html" %}
+                <iframe id="html-response" sandbox title="HTML-ответ"></iframe>
+                <p>Исходный HTML:</p>
+                <pre>{{ response_body }}</pre>
+                {{ response_body|json_script:"html-response-body" }}
+                <script>
+                    const htmlBody = JSON.parse(
+                        document.getElementById("html-response-body").textContent
+                    );
+                    document.getElementById("html-response").srcdoc = htmlBody;
+                </script>
+                {% else %}
+                <pre>{{ response_body }}</pre>
+                {% endif %}
+                {% endif %}
+            </section>
+        </main>
+    </form>
+</body>
+
+</html>
