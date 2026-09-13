@@ -9,6 +9,7 @@ authors = [
 requires-python = ">=3.14"
 dependencies = [
     "django>=6.1.1",
+    "django-environ>=0.14.0",
     "niquests>=3.21.1",
 ]
 

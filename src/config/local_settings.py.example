@@ -1,0 +1,14 @@
+# Этот файл будет импортирован в конце файла settings.py и перезапишет ваши настройки
+SECRET_KEY = "my-insecure-key"
+MEDV_CERT = \
+"""
+Certificate:
+    Data:
+-----BEGIN CERTIFICATE-----
+-----END CERTIFICATE-----
+"""
+MEDV_KEY = \
+"""
+-----BEGIN RSA PRIVATE KEY-----
+-----END RSA PRIVATE KEY-----
+"""
