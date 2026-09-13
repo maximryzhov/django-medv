@@ -34,6 +34,7 @@ class MedvResponse:
         self.status_code = response.getcode()
         self.headers = response.headers
         self.text = response.read().decode("utf-8", errors="replace")
+        self.request_id = request_id
         self.is_jsonrpc_response = False
         self.jsonrpc = None
         self.id = None

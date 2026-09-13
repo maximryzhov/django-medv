@@ -118,6 +118,7 @@ class MedvTestView(FormView):
         status_code = response.status_code
         return {
             "has_response": True,
+            "request_id": response.request_id,
             "response_status_code": status_code,
             "response_content_type": content_type or "не указан",
             "response_kind": kind,

@@ -112,6 +112,7 @@
 
                 {% if has_response %}
                 <h2>Ответ</h2>
+                <p>ID запроса: {{ request_id }}</p>
                 <p class="{% if response_error %}error{% else %}ok{% endif %}">
                     Код ответа: {{ response_status_code }}
                 </p>
