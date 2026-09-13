@@ -1,0 +1,5 @@
+chdir = "src"
+wsgi_app = "config.wsgi:application"
+bind = "127.0.0.1:8000"
+workers = 1
+worker_class = "sync"
