@@ -33,7 +33,7 @@ printf '\nMEDV_KEY="%s"\n' "$(awk 'BEGIN{ORS="\\n"} {print}' <ПУТЬ ДО КЛ
 Переменные `MEDV_CERT` и `MEDV_KEY` в файле `.env` должны быть обрамлены двойными кавычками, каждая строка в переменной должна заканчиваться символом `\n`.
 
 ### Настройка с помощью файла настроек
-1. Скопируйте `src/local_settings.py.example` в `src/local_settings.py` и задайте переменную SECRET_KEY.
+1. Скопируйте `src/config/local_settings.py.example` в `src/config/local_settings.py` и задайте переменную SECRET_KEY.
 2. В файл `src/local_settings.py` добавьте переменные MEDV_CERT и MEDV_KEY.
 
 ПРИМЕЧАНИЕ: при чтении настроек приоритет у `local_settings.py`. Если в разных местах указаны разные данные, то сработают те, что в `local_settings.py`.
