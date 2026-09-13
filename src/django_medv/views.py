@@ -74,7 +74,8 @@ class MedvTestView(FormView):
         context["available_methods"] = self.available_methods
         context["health_checks"] = self.health_checks
         context["request_error"] = self.request_error
-
+        context["BASE_URL"] = MedvClient.BASE_URL
+        
         response = kwargs.get("medv_response")
         if response is not None:
             context.update(self._format_response(response))

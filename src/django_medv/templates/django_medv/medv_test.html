@@ -75,8 +75,9 @@
 
 <body>
     <h1>Проверка Medv API</h1>
-
-    <h2>Проверки соединения</h2>
+    <small><strong>BASE URL:</strong>
+        <a href="{{ BASE_URL }}" target="_blank">{{ BASE_URL }}</a>
+    </small>
     {% for check in health_checks %}
     <p class="status {% if check.ok %}ok{% else %}error{% endif %}">
         {{ check.name }}: {{ check.message }}
@@ -92,7 +93,7 @@
         {{ form.non_field_errors }}
         <main>
             <aside>
-                <h2>Доступные методы</h2>
+                <h2>Выберите метод</h2>
                 <ul>
                     {% for method in available_methods %}
                     <li><a href="?method={{ method|urlencode }}">{{ method }}</a></li>
