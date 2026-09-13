@@ -7,7 +7,7 @@ from tempfile import TemporaryDirectory
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
 
-from .utils import (
+from .validators import (
     CertificateStatus,
     check_certificate_dates,
     check_certificate_matches_key,
