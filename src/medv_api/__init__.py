@@ -1,8 +1,11 @@
+import json
+import ssl
 from contextlib import contextmanager
+from http.client import HTTPException
 from pathlib import Path
 from tempfile import TemporaryDirectory
-
-import urllib3
+from urllib.error import HTTPError, URLError
+from urllib.request import Request, urlopen
 
 from .utils import (
     CertificateStatus,
@@ -26,10 +29,10 @@ class MedvClientConnectionError(MedvClientError):
 
 
 class MedvResponse:
-    def __init__(self, response: urllib3.response.HTTPResponse) -> None:
-        self.status_code = response.status
+    def __init__(self, response) -> None:
+        self.status_code = response.getcode()
         self.headers = response.headers
-        self.text = response.data.decode("utf-8", errors="replace")
+        self.text = response.read().decode("utf-8", errors="replace")
 
 
 class MedvClient:
@@ -63,34 +66,33 @@ class MedvClient:
             )
 
     @contextmanager
-    def _authenticated_pool(self):
+    def _authenticated_context(self):
         with TemporaryDirectory() as temp_dir:
             cert_path = Path(temp_dir) / "certificate.pem"
             key_path = Path(temp_dir) / "private-key.pem"
             cert_path.write_text(self.cert, encoding="utf-8")
             key_path.write_text(self.key, encoding="utf-8")
 
-            pool = urllib3.PoolManager(
-                cert_file=str(cert_path),
-                key_file=str(key_path),
+            context = ssl.create_default_context()
+            context.load_cert_chain(
+                certfile=str(cert_path),
+                keyfile=str(key_path),
             )
-            try:
-                yield pool
-            finally:
-                pool.clear()
+            yield context
 
     def ping_base_url(self) -> None:
         """
         Проверяет, что  сервис доступен
         даже если ответ 4xx или 5xx
         """
-        pool = urllib3.PoolManager()
         try:
-            pool.request("GET", self.BASE_URL, preload_content=True)
-        except urllib3.exceptions.HTTPError as error:
+            try:
+                with urlopen(self.BASE_URL):
+                    pass
+            except HTTPError as response:
+                response.close()
+        except (URLError, HTTPException, OSError) as error:
             raise MedvClientConnectionError("Нет соединения с сервером") from error
-        finally:
-            pool.clear()
 
     def call_method(self, method_name: str, body=None) -> MedvResponse:
         payload = {
@@ -100,15 +102,20 @@ class MedvClient:
         if body is not None:
             payload["params"] = body
 
-        try:
-            with self._authenticated_pool() as pool:
-                response = pool.request(
-                    "POST",
-                    self.BASE_URL,
-                    json=payload,
-                    preload_content=True,
-                )
-        except urllib3.exceptions.HTTPError as error:
-            raise MedvClientConnectionError("Нет соединения с сервером") from error
+        request = Request(
+            self.BASE_URL,
+            data=json.dumps(payload).encode("utf-8"),
+            headers={"Content-Type": "application/json"},
+            method="POST",
+        )
 
-        return MedvResponse(response)
+        try:
+            with self._authenticated_context() as context:
+                try:
+                    with urlopen(request, context=context) as response:
+                        return MedvResponse(response)
+                except HTTPError as response:
+                    with response:
+                        return MedvResponse(response)
+        except (URLError, HTTPException, OSError) as error:
+            raise MedvClientConnectionError("Нет соединения с сервером") from error
