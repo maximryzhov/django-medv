@@ -140,6 +140,7 @@ class MedvClient:
             raise MedvClientConnectionError("Нет соединения с сервером") from error
 
     def call_method(self, method_name: str, body=None) -> MedvResponse:
+        print(f"method_name: {method_name}")
         request_id = str(uuid4())
         payload = {
             "jsonrpc": "2.0",

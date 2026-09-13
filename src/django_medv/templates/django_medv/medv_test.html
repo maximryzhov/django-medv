@@ -88,7 +88,7 @@
     <p class="error">Ошибка запроса: {{ request_error }}</p>
     {% endif %}
 
-    <form method="post">
+    <form id="medv-method-form" method="post">
         {% csrf_token %}
         {{ form.non_field_errors }}
         <main>
@@ -136,6 +136,17 @@
             </section>
         </main>
     </form>
+    <script>
+        const methodForm = document.getElementById("medv-method-form");
+        methodForm.addEventListener("submit", () => {
+            const action = new URL(window.location.href);
+            action.searchParams.set(
+                "method",
+                methodForm.elements.method_name.value.trim()
+            );
+            methodForm.action = action.toString();
+        });
+    </script>
 </body>
 
 </html>
