@@ -45,7 +45,7 @@ printf '\nMEDV_KEY="%s"\n' "$(awk 'BEGIN{ORS="\\n"} {print}' <ПУТЬ ДО КЛ
 ПРИМЕЧАНИЕ: при чтении настроек приоритет у `local_settings.py`. Если в разных местах указаны разные данные, то сработают те, что в `local_settings.py`.
 
 ##  Запуск
-1. Проведите миграции `uv run src/manage.py migrage`
+1. Проведите миграции `uv run src/manage.py migrate`
 2. Запустите `uv run src/manage.py runserver`
 
 ## Использование
