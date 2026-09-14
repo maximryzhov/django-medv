@@ -40,7 +40,7 @@ class MedvClientTests(TestCase):
                 return_value=nullcontext(ssl_context),
             ),
             patch(
-                "medv_api.urlopen",
+                "medv_api.client.urlopen",
                 return_value=FakeHTTPResponse(body=b'{"result": true}'),
             ) as urlopen,
         ):
@@ -66,14 +66,14 @@ class MedvClientTests(TestCase):
         request_id = UUID("12345678-1234-5678-1234-567812345678")
 
         with (
-            patch("medv_api.uuid4", return_value=request_id),
+            patch("medv_api.client.uuid4", return_value=request_id),
             patch.object(
                 client,
                 "_authenticated_context",
                 return_value=nullcontext(object()),
             ),
             patch(
-                "medv_api.urlopen",
+                "medv_api.client.urlopen",
                 return_value=FakeHTTPResponse(
                     body=json.dumps(
                         {
@@ -138,7 +138,7 @@ class MedvClientTests(TestCase):
                 "_authenticated_context",
                 return_value=nullcontext(object()),
             ),
-            patch("medv_api.urlopen", return_value=FakeHTTPResponse()) as urlopen,
+            patch("medv_api.client.urlopen", return_value=FakeHTTPResponse()) as urlopen,
         ):
             client.call_method("auth.check")
 
@@ -157,7 +157,7 @@ class MedvClientTests(TestCase):
                 "_authenticated_context",
                 return_value=nullcontext(object()),
             ),
-            patch("medv_api.urlopen", side_effect=URLError("network error")),
+            patch("medv_api.client.urlopen", side_effect=URLError("network error")),
             self.assertRaisesRegex(
                 MedvClientConnectionError,
                 "Нет соединения с сервером",
